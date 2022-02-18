@@ -191,17 +191,23 @@ func GetVideos(c *fiber.Ctx) error {
 	customer := GetCustomerNameFromJwt(claims)
 
 	var uploads []Upload
-	query := DB.Where("client_id = ?", fmt.Sprintf("%s_client", customer))
+	query := DB.
+		Where("client_id = ?", fmt.Sprintf("%s_client", customer))
 
 	if requestBody.Category != nil {
-		query.Where("category = ?", requestBody.Category)
+		query.
+			Where("category = ?", requestBody.Category)
 	}
 
 	if requestBody.TitleFilter != nil {
-		query.Where("title like ?", requestBody.TitleFilter)
+		query.
+			Where("title like ?", requestBody.TitleFilter)
 	}
 
-	err := query.Offset(requestBody.StartFrom).Limit(requestBody.Amount).Find(&uploads)
+	err := query.
+		Offset(requestBody.StartFrom).
+		Limit(requestBody.Amount).
+		Find(&uploads)
 	if err != nil {
 		return c.Status(500).JSON("error during fetch videouploads")
 	}
@@ -232,17 +238,22 @@ func GetVideosWithApiKey(c *fiber.Ctx) error {
 	}
 
 	var uploads []Upload
-	query := DB.Where("client_id = ?", fmt.Sprintf("%s_client", requestBody.Customer))
+	query := DB.
+		Where("client_id = ?", fmt.Sprintf("%s_client", requestBody.Customer))
 
 	if requestBody.Category != nil {
-		query.Where("category = ?", requestBody.Category)
+		query.
+			Where("category = ?", requestBody.Category)
 	}
 
 	if requestBody.TitleFilter != nil {
-		query.Where("title like ?", requestBody.TitleFilter)
+		query.
+			Where("title like ?", requestBody.TitleFilter)
 	}
-
-	err = query.Offset(requestBody.StartFrom).Limit(requestBody.Amount).Find(&uploads)
+	err = query.
+		Offset(requestBody.StartFrom).
+		Limit(requestBody.Amount).
+		Find(&uploads)
 	if err != nil {
 		return c.Status(500).JSON("error during fetch videouploads")
 	}
@@ -288,5 +299,13 @@ func GetVideosWithApiKey(c *fiber.Ctx) error {
 // }
 
 // func DeleteUser(c *fiber.Ctx) error {
+
+// }
+
+// func GetEncodingSettings(c *fiber.Ctx) error {
+
+// }
+
+// func UpdateEncodingSettings(c *fiber.Ctx) error {
 
 // }

@@ -47,7 +47,9 @@ func init() {
 	events.Post("/", CreateEvent)
 	events.Put("/:event_id/start", StarEvent)
 	events.Put("/:event_id/finish", SetEventCompleted)
+
 	// customers := v2_1.Group("/customers")
+
 	videos := v2_1.Group("/videos")
 	videos.Post("/", JwtProtected(), GetVideos)
 
