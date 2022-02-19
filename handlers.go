@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 )
 
 //RESTREAMERS
@@ -37,21 +38,21 @@ func GetRestreamersWithApiKey(c *fiber.Ctx) error {
 		ApiKey   string `json:"api_key"`
 		Customer string `json:"customer"`
 	}
-	if err := c.BodyParser(&requestBody); err != nil {
+	if err := c.BodyParser(&restreamersWithApikey); err != nil {
 		return err
 	}
 	//getting apikey info
 	var apikeyInfo CustomerApiKey
-	err := DB.Where("id = ?", fmt.Sprintf("%s_id", requestBody.Customer)).Find(&apikeyInfo)
+	err := DB.Where("id = ?", fmt.Sprintf("%s_id", restreamersWithApikey.Customer)).Find(&apikeyInfo)
 	if err != nil {
 		return c.Status(500).JSON("error during fetch apikey info")
 	}
-	if apikeyInfo.APIKey != requestBody.ApiKey && apikeyInfo.ID != fmt.Sprintf("%s_id", requestBody.Customer) {
+	if apikeyInfo.APIKey != restreamersWithApikey.ApiKey && apikeyInfo.ID != fmt.Sprintf("%s_id", restreamersWithApikey.Customer) {
 		return c.Status(401).JSON("apikey does not match")
 	}
 	//getting restreamers
 	var restr []Restreamer
-	err = DB.Preload("RestreamerSrt").Preload("RestreamerSettings").Where("owner = ?", requestBody.Customer).Find(&restr)
+	err = DB.Preload("RestreamerSrt").Preload("RestreamerSettings").Where("owner = ?", restreamersWithApikey.Customer).Find(&restr)
 	if err != nil {
 		return c.Status(500).JSON("error during fetch restreamer")
 	}
@@ -286,7 +287,7 @@ func GetVideosWithApiKey(c *fiber.Ctx) error {
 // }
 
 func CreateVideo(c *fiber.Ctx) error {
-	var requestBody struct {
+	var createVideoRequest struct {
 		Filename      string `json:"filename"`
 		Size          int    `json:"size"`
 		Category      int    `json:"category"`
@@ -297,7 +298,7 @@ func CreateVideo(c *fiber.Ctx) error {
 		CustomerId    int    `json:"customer_id"`
 		ReportedEmail string `json:"reporter_email"`
 	}
-	if err := c.BodyParser(&requestBody); err != nil {
+	if err := c.BodyParser(&createVideoRequest); err != nil {
 		return err
 	}
 
@@ -340,34 +341,34 @@ func CreateVideo(c *fiber.Ctx) error {
 
 	//getting apikey info
 	var apikeyInfo CustomerApiKey
-	err := DB.Where("id = ?", fmt.Sprintf("%s_id", requestBody.Customer)).Find(&apikeyInfo)
+	err := DB.Where("id = ?", fmt.Sprintf("%s_id", createVideoRequest.Customer)).Find(&apikeyInfo)
 	if err != nil {
 		return c.Status(500).JSON("error during fetch apikey info")
-
+	}
 	//call restreamer to get jobid for encoding job
 	encodingApiUrl := "https://api.tngrm.io/api/tangram/customer/v1/encoding"
 
 	client := resty.New()
 	client.SetDebug(true)
-		
+
 	//location like /mnt/vackstage/vackstageBucket/upload/splash_video.mp4
 	//creating path for bucket mount, needed for encoding api to search for the video on the bucket folder
-	filePathBucket := "/mnt/" + requestBody.Customer + "/" + requestBody.Customer + requestBody.Filename
+	filePathBucket := "/mnt/" + createVideoRequest.Customer + "/" + createVideoRequest.Customer + createVideoRequest.Filename
 
-	response, err = client.R().
+	response, errz := client.R().
 		SetHeader("Content-Type", "application/json").
 		SetResult(&UploadEncodingResponse{}).
 		SetBody(&uploadEncodingRequest{
 			Jobid:           "0",
 			SrcVideo:        filePathBucket,
-			APIKey:          responseApikey.APIKey,
+			APIKey:          apikeyInfo.APIKey,
 			Profiles:        encodingProfiles,
 			ThumbnailNumber: 4,
-			CustomerID:      fmt.Sprint(requestBody.CustomerId)}).
+			CustomerID:      fmt.Sprint(createVideoRequest.CustomerId)}).
 		Post(encodingApiUrl)
-	if err != nil {
-		logrus.Errorf(err.Error())
-		return err
+	if errz != nil {
+		logrus.Errorf(errz.Error())
+		return errz
 	}
 	responseEncoding := response.Result().(*UploadEncodingResponse)
 
