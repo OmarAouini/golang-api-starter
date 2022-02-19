@@ -13,6 +13,13 @@ import (
 
 //RESTREAMERS
 
+// GetRestreamers godoc
+// @Summary      GetRestreamers
+// @Description  need jwt with customer_name
+// @Tags         restreamer
+// @Produce      json
+// @Success      200 {array} Restreamer
+// @Router       /restreamers [get]
 func GetRestreamers(c *fiber.Ctx) error {
 	claims := c.Context().Value("tokenClaims").(jwt.MapClaims)
 	customer := GetCustomerNameFromJwt(claims)
@@ -26,7 +33,7 @@ func GetRestreamers(c *fiber.Ctx) error {
 }
 
 func GetRestreamersWithApiKey(c *fiber.Ctx) error {
-	var requestBody struct {
+	var restreamersWithApikey struct {
 		ApiKey   string `json:"api_key"`
 		Customer string `json:"customer"`
 	}

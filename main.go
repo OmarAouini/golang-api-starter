@@ -52,8 +52,9 @@ func init() {
 
 	videos := v2_1.Group("/videos")
 	videos.Post("/", JwtProtected(), GetVideos)
+	videos.Post("/create", JwtProtected(), CreateVideo)
 
-	//secured endpoints
+	//secured endpoints with apikey
 	secured := v2_1.Group("/secured")
 	restreamers_secured := secured.Group("/restreamers")
 	restreamers_secured.Post("/", GetRestreamersWithApiKey)
