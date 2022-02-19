@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
@@ -182,6 +184,7 @@ func GetVideos(c *fiber.Ctx) error {
 		StartFrom   int     `json:"start_from"`
 		Category    *string `json:"category"`
 		TitleFilter *string `json:"q"`
+		Tags        *string `json:"tags"`
 	}
 	if err := c.BodyParser(&requestBody); err != nil {
 		return err
@@ -204,6 +207,11 @@ func GetVideos(c *fiber.Ctx) error {
 			Where("title like ?", requestBody.TitleFilter)
 	}
 
+	if requestBody.Tags != nil {
+		query.
+			Where("tags like ?", requestBody.TitleFilter)
+	}
+
 	err := query.
 		Offset(requestBody.StartFrom).
 		Limit(requestBody.Amount).
@@ -223,6 +231,7 @@ func GetVideosWithApiKey(c *fiber.Ctx) error {
 		StartFrom   int     `json:"start_from"`
 		Category    *string `json:"category"`
 		TitleFilter *string `json:"q"`
+		Tags        *string `json:"tags"`
 	}
 	if err := c.BodyParser(&requestBody); err != nil {
 		return err
@@ -250,6 +259,11 @@ func GetVideosWithApiKey(c *fiber.Ctx) error {
 		query.
 			Where("title like ?", requestBody.TitleFilter)
 	}
+
+	if requestBody.Tags != nil {
+		query.
+			Where("tags like ?", requestBody.TitleFilter)
+	}
 	err = query.
 		Offset(requestBody.StartFrom).
 		Limit(requestBody.Amount).
@@ -260,9 +274,111 @@ func GetVideosWithApiKey(c *fiber.Ctx) error {
 	return c.Status(200).JSON(uploads)
 }
 
-// func CreateVideo(c *fiber.Ctx) error {
+// func GetSingleVideoWithApiKey(c *fiber.Ctx) error {
 
 // }
+
+func CreateVideo(c *fiber.Ctx) error {
+	var requestBody struct {
+		Filename      string `json:"filename"`
+		Size          int    `json:"size"`
+		Category      int    `json:"category"`
+		Title         string `json:"title"`
+		Tags          string `json:"tags"`
+		Location      string `json:"location"`
+		Customer      string `json:"customer"`
+		CustomerId    int    `json:"customer_id"`
+		ReportedEmail string `json:"reporter_email"`
+	}
+	if err := c.BodyParser(&requestBody); err != nil {
+		return err
+	}
+
+	type uploadEncodingRequest struct {
+		Jobid           string   `json:"jobid"`
+		SrcVideo        string   `json:"src_video"`
+		Profiles        []string `json:"profiles"`
+		APIKey          string   `json:"api_key"`
+		ThumbnailNumber int      `json:"thumbnail_number"`
+		CustomerID      string   `json:"customer_id"`
+	}
+
+	type ManifestUrl struct {
+		High720  string `json:"high_720"`
+		High1080 string `json:"high_1080"`
+		High360  string `json:"high_360"`
+		High480  string `json:"high_480"`
+	}
+
+	type ThumbnailsUrl struct {
+		High1080 []string `json:"high_1080"`
+		High360  []string `json:"high_360"`
+		Original []string `json:"original"`
+		High720  []string `json:"high_720"`
+		High480  []string `json:"high_480"`
+	}
+
+	type UploadEncodingResponse struct {
+		Result        *string          `json:"result"`
+		Jobid         *int             `json:"jobid"`
+		OriginalURL   *string          `json:"original_url"`
+		ManifestURL   *ManifestUrl     `json:"manifest_url"`
+		ThumbnailsURL *[]ThumbnailsUrl `json:"thumbnails_Url"`
+		Message       *string          `json:"message"`
+	}
+
+	//defult profiles for encoding upload
+	encodingProfiles := make([]string, 0)
+	encodingProfiles = append(encodingProfiles, "hls_high_1080p", "hls_high_720p", "hls_high_480p", "hls_high_360p")
+
+	//getting apikey info
+	var apikeyInfo CustomerApiKey
+	err := DB.Where("id = ?", fmt.Sprintf("%s_id", requestBody.Customer)).Find(&apikeyInfo)
+	if err != nil {
+		return c.Status(500).JSON("error during fetch apikey info")
+
+	//call restreamer to get jobid for encoding job
+	encodingApiUrl := "https://api.tngrm.io/api/tangram/customer/v1/encoding"
+
+	client := resty.New()
+	client.SetDebug(true)
+		
+	//location like /mnt/vackstage/vackstageBucket/upload/splash_video.mp4
+	//creating path for bucket mount, needed for encoding api to search for the video on the bucket folder
+	filePathBucket := "/mnt/" + requestBody.Customer + "/" + requestBody.Customer + requestBody.Filename
+
+	response, err = client.R().
+		SetHeader("Content-Type", "application/json").
+		SetResult(&UploadEncodingResponse{}).
+		SetBody(&uploadEncodingRequest{
+			Jobid:           "0",
+			SrcVideo:        filePathBucket,
+			APIKey:          responseApikey.APIKey,
+			Profiles:        encodingProfiles,
+			ThumbnailNumber: 4,
+			CustomerID:      fmt.Sprint(requestBody.CustomerId)}).
+		Post(encodingApiUrl)
+	if err != nil {
+		logrus.Errorf(err.Error())
+		return err
+	}
+	responseEncoding := response.Result().(*UploadEncodingResponse)
+
+	if !response.IsSuccess() {
+		logrus.Errorf("error during call encoding restreamer api, cause: %s", string(*responseEncoding.Message))
+		return fmt.Errorf("error during call encoding restreamer api, cause: %s", string(*responseEncoding.Message))
+	}
+
+	if *responseEncoding.Result == "KO" {
+		logrus.Errorf("error during call encoding restreamer api, cause: %v", responseEncoding)
+		return fmt.Errorf("error during call encoding restreamer api, cause: %v", responseEncoding)
+	}
+
+	//TODO
+
+	return c.Status(http.StatusCreated).JSON("OK")
+
+}
 
 // func DeleteVideo(c *fiber.Ctx) error {
 

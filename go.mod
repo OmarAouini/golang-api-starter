@@ -7,11 +7,13 @@ require github.com/gofiber/fiber/v2 v2.27.0
 require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.4 // indirect
+	golang.org/x/net v0.0.0-20220111093109-d55c255bac03 // indirect
 )
 
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/caarlos0/env/v6 v6.9.1
+	github.com/go-resty/resty/v2 v2.7.0
 	github.com/golang-jwt/jwt/v4 v4.3.0
 	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.4.0
