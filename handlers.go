@@ -34,25 +34,25 @@ func GetRestreamers(c *fiber.Ctx) error {
 }
 
 func GetRestreamersWithApiKey(c *fiber.Ctx) error {
-	var restreamersWithApikey struct {
+	var restreamersWithApikeyRequest struct {
 		ApiKey   string `json:"api_key"`
 		Customer string `json:"customer"`
 	}
-	if err := c.BodyParser(&restreamersWithApikey); err != nil {
+	if err := c.BodyParser(&restreamersWithApikeyRequest); err != nil {
 		return err
 	}
 	//getting apikey info
 	var apikeyInfo CustomerApiKey
-	err := DB.Where("id = ?", fmt.Sprintf("%s_id", restreamersWithApikey.Customer)).Find(&apikeyInfo)
+	err := DB.Where("id = ?", fmt.Sprintf("%s_id", restreamersWithApikeyRequest.Customer)).Find(&apikeyInfo)
 	if err != nil {
 		return c.Status(500).JSON("error during fetch apikey info")
 	}
-	if apikeyInfo.APIKey != restreamersWithApikey.ApiKey && apikeyInfo.ID != fmt.Sprintf("%s_id", restreamersWithApikey.Customer) {
+	if apikeyInfo.APIKey != restreamersWithApikeyRequest.ApiKey && apikeyInfo.ID != fmt.Sprintf("%s_id", restreamersWithApikeyRequest.Customer) {
 		return c.Status(401).JSON("apikey does not match")
 	}
 	//getting restreamers
 	var restr []Restreamer
-	err = DB.Preload("RestreamerSrt").Preload("RestreamerSettings").Where("owner = ?", restreamersWithApikey.Customer).Find(&restr)
+	err = DB.Preload("RestreamerSrt").Preload("RestreamerSettings").Where("owner = ?", restreamersWithApikeyRequest.Customer).Find(&restr)
 	if err != nil {
 		return c.Status(500).JSON("error during fetch restreamer")
 	}
