@@ -1,0 +1,170 @@
+basePath: /
+definitions:
+  entities.Company:
+    properties:
+      address:
+        type: string
+      email:
+        type: string
+      employees:
+        items:
+          $ref: '#/definitions/entities.Employee'
+        type: array
+      id:
+        type: integer
+      name:
+        type: string
+      phone_number:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/entities.Project'
+        type: array
+      vat_code:
+        type: string
+    type: object
+  entities.Employee:
+    properties:
+      address:
+        type: string
+      age:
+        type: integer
+      company_id:
+        type: integer
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      phone_number:
+        type: string
+      qualification:
+        type: string
+      surname:
+        type: string
+      vat_code:
+        type: string
+    type: object
+  entities.Project:
+    properties:
+      category:
+        type: string
+      company_id:
+        type: integer
+      end_at:
+        type: string
+      expenses:
+        type: number
+      id:
+        type: integer
+      incomes:
+        type: number
+      name:
+        type: string
+      start_at:
+        type: string
+      update_at:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server celler server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Sample API
+  version: "1.0"
+paths:
+  /companies:
+    delete:
+      description: companies Delete
+      parameters:
+      - description: company id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: Delete
+      tags:
+      - companies
+    get:
+      description: All companies
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entities.Company'
+            type: array
+      summary: All
+      tags:
+      - companies
+    post:
+      description: companies create
+      parameters:
+      - description: company
+        in: body
+        name: company
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Company'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ""
+      summary: Create
+      tags:
+      - companies
+  /companies/id/:id:
+    get:
+      description: companies ById
+      parameters:
+      - description: company id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Company'
+      summary: ById
+      tags:
+      - companies
+  /companies/name/:name:
+    get:
+      description: companies ByName
+      parameters:
+      - description: company name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entities.Company'
+      summary: ByName
+      tags:
+      - companies
+swagger: "2.0"
