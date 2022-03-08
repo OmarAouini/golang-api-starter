@@ -2,7 +2,6 @@ package store
 
 import (
 	"github.com/OmarAouini/golang-api-starter/entities"
-	"gorm.io/gorm"
 )
 
 type EmployeeStore interface {
@@ -10,6 +9,4 @@ type EmployeeStore interface {
 	GetByName(name string) (*entities.Employee, error)
 }
 
-type MySqlEmployeeStore struct {
-	DB *gorm.DB
-}
+type MySqlEmployeeStore struct{}
