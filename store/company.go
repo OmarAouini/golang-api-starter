@@ -10,6 +10,7 @@ type CompanyStore interface {
 	Get(id int) (*entities.Company, error)
 	GetByName(name string) (*entities.Company, error)
 	Create(new *entities.Company) error
+	Delete(id int) error
 }
 
 type MySqlCompanyStore struct{}
@@ -43,6 +44,14 @@ func (s *MySqlCompanyStore) GetByName(name string) (*entities.Company, error) {
 
 func (s *MySqlCompanyStore) Create(new *entities.Company) error {
 	err := database.DB.Save(&new).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *MySqlCompanyStore) Delete(id int) error {
+	err := database.DB.Where("id = ?", id).Delete(&entities.Company{}).Error
 	if err != nil {
 		return err
 	}

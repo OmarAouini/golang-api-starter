@@ -17,6 +17,7 @@ func CompanyRoutes(r *gin.Engine) {
 	companies.POST("/", controller.Create)
 	companies.GET("/id/:id", controller.ById)
 	companies.GET("/name/:name", controller.ByName)
+	companies.DELETE("/id/:id", controller.Delete)
 }
 
 type CompanyController struct {
@@ -83,4 +84,17 @@ func (c *CompanyController) Create(ctx *gin.Context) {
 		return
 	}
 	ctx.Status(http.StatusCreated)
+}
+
+func (c *CompanyController) Delete(ctx *gin.Context) {
+	param, _ := ctx.Params.Get("id")
+	id, _ := strconv.Atoi(param)
+	err := c.Service.Delete(id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+	ctx.Status(http.StatusOK)
 }

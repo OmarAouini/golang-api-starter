@@ -40,3 +40,11 @@ func (s *CompanyService) Create(comp *entities.Company) error {
 	}
 	return nil
 }
+
+func (s *CompanyService) Delete(id int) error {
+	err := s.Store.Delete(id)
+	if err != nil {
+		return err
+	}
+	return nil
+}

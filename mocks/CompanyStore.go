@@ -49,6 +49,20 @@ func (_m *CompanyStore) Create(new *entities.Company) error {
 	return r0
 }
 
+// Delete provides a mock function with given fields: id
+func (_m *CompanyStore) Delete(id int) error {
+	ret := _m.Called(id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int) error); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Get provides a mock function with given fields: id
 func (_m *CompanyStore) Get(id int) (*entities.Company, error) {
 	ret := _m.Called(id)
