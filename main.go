@@ -1,72 +1,29 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/OmarAouini/golang-api-starter/entities"
+	"github.com/OmarAouini/golang-api-starter/store"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
-var serverAddress = "0.0.0.0:8080"
-var DB gorm.DB
-var router *fiber.App
+func main() {
 
-func init() {
+	// refer https://github.com/go-sql-driver/mysql#dsn-data-source-name for details
+	dsn := "root:root@tcp(127.0.0.1:3306)/api_data?charset=utf8mb4&parseTime=True&loc=Local"
+	db, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db.AutoMigrate(&entities.Company{}, &entities.Employee{}, &entities.Project{})
 
-	//logger config
-	ConfigLogger()
-	// env config
-	ConfigEnv()
+	store := store.MySqlCompanyStore{DB: db}
+	res, _ := store.Get(2)
 
-	//fiber router
-	router = fiber.New()
-	router.Use(logger.New())
-	router.Use(recover.New())
-	router.Use(cors.New(cors.Config{
-		AllowOrigins: "*",
-		AllowHeaders: "Origin, Content-Type, Accept, Authorization, Api-Secret",
-		AllowMethods: "GET, POST, PUT, DELETE, HEAD, OPTIONS",
-	}))
-
-	//routes
-	v2_1 := router.Group("/api/v2.1") // this is for versioning, use for avoiding api version clash
-	v2_1.Get("/health", func(c *fiber.Ctx) error {
-		return c.Status(200).JSON("OK")
-	})
-
-	//normal endpoints
-	restreamers := v2_1.Group("/restreamers")
-	restreamers.Get("/", JwtProtected(), GetRestreamers)
-	restreamers.Post("/", CreateRestreamer)
-	restreamers.Put("/", UpdateRestreamer)
-	events := restreamers.Group("/events")
-	events.Get("/", EventsHistory)
-	events.Post("/", CreateEvent)
-	events.Put("/:event_id/start", StarEvent)
-	events.Put("/:event_id/finish", SetEventCompleted)
-
-	// customers := v2_1.Group("/customers")
-
-	videos := v2_1.Group("/videos")
-	videos.Post("/", JwtProtected(), GetVideos)
-	videos.Post("/create", JwtProtected(), CreateVideo)
-
-	//secured endpoints with apikey
-	secured := v2_1.Group("/secured")
-	restreamers_secured := secured.Group("/restreamers")
-	restreamers_secured.Post("/", GetRestreamersWithApiKey)
-	// customers_secured := secured.Group("/customers")
-	videos_secured := secured.Group("/videos")
-	videos_secured.Post("/", GetVideosWithApiKey)
-
+	fmt.Println(prettyPrint(res))
 }
 
-func main() {
-	fmt.Println()
-	fmt.Printf("\nENV: %s", CONFIG.AppEnv)
-	fmt.Printf("\nRUNNING MODE: %s", CONFIG.RunningMode)
-	router.Listen(serverAddress)
+func prettyPrint(i interface{}) string {
+	s, _ := json.MarshalIndent(i, "", "\t")
+	return string(s)
 }
