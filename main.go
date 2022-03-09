@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+
+	"github.com/OmarAouini/golang-api-starter/constants"
 	"github.com/OmarAouini/golang-api-starter/database"
 	docs "github.com/OmarAouini/golang-api-starter/docs"
 	"github.com/OmarAouini/golang-api-starter/handlers"
@@ -21,7 +24,7 @@ import (
 // @host      localhost:8080
 // @BasePath  /
 func main() {
-	database.ConnectDb("root", "root", "localhost", "3006", "api_data")
+	database.ConnectDb(constants.DB_USER, constants.DB_PASS, constants.DB_HOST, constants.DB_PORT, constants.DB_NAME)
 	database.Migrate()
 	//router and middleware config
 	r := gin.Default()
@@ -34,5 +37,6 @@ func main() {
 		ginSwagger.DefaultModelsExpandDepth(-1)))
 
 	//run
-	r.Run("0.0.0.0:8080")
+	fmt.Printf("server is listening on port %s", constants.PORT)
+	r.Run(fmt.Sprintf("%s:%s", constants.HOST, constants.PORT))
 }
