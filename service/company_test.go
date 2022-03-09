@@ -8,6 +8,8 @@ import (
 	"github.com/OmarAouini/golang-api-starter/entities"
 	"github.com/OmarAouini/golang-api-starter/mocks"
 	"github.com/OmarAouini/golang-api-starter/store"
+	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 )
 
 func TestCompanyService_All(t *testing.T) {
@@ -76,6 +78,9 @@ func TestCompanyService_All(t *testing.T) {
 }
 
 func TestCompanyService_Get(t *testing.T) {
+
+	mockStore := new(mocks.CompanyStore)
+
 	type fields struct {
 		Store store.CompanyStore
 	}
@@ -86,13 +91,49 @@ func TestCompanyService_Get(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
+		prepare func(m *mocks.CompanyStore)
 		want    *entities.Company
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name:   "should return company",
+			fields: fields{Store: mockStore},
+			args:   args{id: 1},
+			prepare: func(m *mocks.CompanyStore) {
+				m.On("Get", 1).Return(&entities.Company{ID: 1}, nil).Once()
+			},
+			want:    &entities.Company{ID: 1},
+			wantErr: false,
+		},
+		{
+			name:   "should not found",
+			fields: fields{Store: mockStore},
+			args:   args{id: 1},
+			prepare: func(m *mocks.CompanyStore) {
+				m.On("Get", 1).Return(nil, gorm.ErrRecordNotFound).Once()
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:   "should error",
+			fields: fields{Store: mockStore},
+			args:   args{id: 1},
+			prepare: func(m *mocks.CompanyStore) {
+				m.On("Get", 1).Return(nil, assert.AnError).Once()
+			},
+			want:    nil,
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+
+			//prepare stubbing
+			if tt.prepare != nil {
+				tt.prepare(mockStore)
+			}
+
 			s := &CompanyService{
 				Store: tt.fields.Store,
 			}
@@ -109,6 +150,9 @@ func TestCompanyService_Get(t *testing.T) {
 }
 
 func TestCompanyService_GetByName(t *testing.T) {
+
+	mockStore := new(mocks.CompanyStore)
+
 	type fields struct {
 		Store store.CompanyStore
 	}
@@ -119,13 +163,39 @@ func TestCompanyService_GetByName(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
+		prepare func(m *mocks.CompanyStore)
 		want    *entities.Company
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name:   "should return company",
+			fields: fields{Store: mockStore},
+			args:   args{name: "testCompanyName"},
+			prepare: func(m *mocks.CompanyStore) {
+				m.On("GetByName", "testCompanyName").Return(&entities.Company{Name: "testCompanyName"}, nil).Once()
+			},
+			want:    &entities.Company{Name: "testCompanyName"},
+			wantErr: false,
+		},
+		{
+			name:   "should not found",
+			fields: fields{Store: mockStore},
+			args:   args{name: "testCompanyName"},
+			prepare: func(m *mocks.CompanyStore) {
+				m.On("GetByName", "testCompanyName").Return(nil, gorm.ErrRecordNotFound).Once()
+			},
+			want:    nil,
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+
+			//prepare stubbing
+			if tt.prepare != nil {
+				tt.prepare(mockStore)
+			}
+
 			s := &CompanyService{
 				Store: tt.fields.Store,
 			}
@@ -142,6 +212,9 @@ func TestCompanyService_GetByName(t *testing.T) {
 }
 
 func TestCompanyService_Create(t *testing.T) {
+
+	mockStore := new(mocks.CompanyStore)
+
 	type fields struct {
 		Store store.CompanyStore
 	}
@@ -152,12 +225,36 @@ func TestCompanyService_Create(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
+		prepare func(m *mocks.CompanyStore)
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name:   "should create company",
+			fields: fields{Store: mockStore},
+			args:   args{&entities.Company{ID: 21}},
+			prepare: func(m *mocks.CompanyStore) {
+				m.On("Create", &entities.Company{ID: 21}).Return(nil)
+			},
+			wantErr: false,
+		},
+		{
+			name:   "should return error",
+			fields: fields{Store: mockStore},
+			args:   args{&entities.Company{ID: 21}},
+			prepare: func(m *mocks.CompanyStore) {
+				m.On("Create", &entities.Company{ID: 21}).Return(assert.AnError)
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+
+			//prepare stubbing
+			if tt.prepare != nil {
+				tt.prepare(mockStore)
+			}
+
 			s := &CompanyService{
 				Store: tt.fields.Store,
 			}
@@ -169,6 +266,9 @@ func TestCompanyService_Create(t *testing.T) {
 }
 
 func TestCompanyService_Delete(t *testing.T) {
+
+	mockStore := new(mocks.CompanyStore)
+
 	type fields struct {
 		Store store.CompanyStore
 	}
@@ -176,19 +276,53 @@ func TestCompanyService_Delete(t *testing.T) {
 		id int
 	}
 	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
+		name       string
+		fields     fields
+		args       args
+		prepare    func(m *mocks.CompanyStore)
+		afterCheck func()
+		wantErr    bool
 	}{
-		// TODO: Add test cases.
+		{
+			name:   "should delete company",
+			fields: fields{Store: mockStore},
+			args:   args{id: 12},
+			prepare: func(m *mocks.CompanyStore) {
+				m.On("Delete", 12).Return(nil)
+				m.On("Get", 12).Return(nil, gorm.ErrRecordNotFound)
+			},
+			afterCheck: func() {
+				comp, err := mockStore.Get(12)
+				assert.True(t, comp == nil)
+				assert.True(t, err != nil)
+				assert.True(t, err == gorm.ErrRecordNotFound)
+			},
+			wantErr: false,
+		},
+		{
+			name:   "should not found",
+			fields: fields{Store: mockStore},
+			args:   args{id: 12},
+			prepare: func(m *mocks.CompanyStore) {
+				m.On("Delete", 12).Return(assert.AnError)
+			},
+			afterCheck: func() {},
+			wantErr:    false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+
+			//prepare stubbing
+			if tt.prepare != nil {
+				tt.prepare(mockStore)
+			}
+
 			s := &CompanyService{
 				Store: tt.fields.Store,
 			}
 			if err := s.Delete(tt.args.id); (err != nil) != tt.wantErr {
+				tt.afterCheck()
 				t.Errorf("CompanyService.Delete() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
