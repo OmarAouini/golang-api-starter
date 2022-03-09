@@ -14,6 +14,8 @@ it will also generate a .out coverage file.
 ```sh
 ./build/gen_swagger.sh
 ```
+to access the docs, run the app and go to: 
+[swagger docs](http://localhost:8080/swagger/index.html)
 - generate test Mocks
 ```sh
 ./build/gen_mock.sh
