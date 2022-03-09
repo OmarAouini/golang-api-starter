@@ -21,7 +21,7 @@ import (
 // @host      localhost:8080
 // @BasePath  /
 func main() {
-	database.ConnectDb()
+	database.ConnectDb("root", "root", "localhost", "3006", "api_data")
 	database.Migrate()
 	//router and middleware config
 	r := gin.Default()
