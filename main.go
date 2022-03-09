@@ -24,7 +24,7 @@ import (
 // @host      localhost:8080
 // @BasePath  /
 func main() {
-	database.ConnectDb(constants.DB_USER, constants.DB_PASS, constants.DB_HOST, constants.DB_PORT, constants.DB_NAME)
+	database.ConnectDb(constants.DB_USER, constants.DB_PASS, constants.DB_HOST, constants.DB_PORT, constants.DB_NAME, constants.DB_IDLE_CONN, constants.DB_MAX_CONN)
 	database.Migrate()
 	//router and middleware config
 	r := gin.Default()
