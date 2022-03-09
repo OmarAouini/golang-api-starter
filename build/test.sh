@@ -1,2 +1,2 @@
 echo "run tests..."
-go test tests/*
+go test ./...

@@ -1,4 +1,4 @@
-package tests
+package service
 
 import (
 	"errors"
@@ -7,7 +7,6 @@ import (
 
 	"github.com/OmarAouini/golang-api-starter/entities"
 	"github.com/OmarAouini/golang-api-starter/mocks"
-	"github.com/OmarAouini/golang-api-starter/service"
 	"github.com/OmarAouini/golang-api-starter/store"
 )
 
@@ -61,7 +60,7 @@ func TestCompanyService_All(t *testing.T) {
 				tt.prepare(mockStore)
 			}
 
-			s := &service.CompanyService{
+			s := &CompanyService{
 				Store: tt.fields.Store,
 			}
 			got, err := s.All()
@@ -94,7 +93,7 @@ func TestCompanyService_Get(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &service.CompanyService{
+			s := &CompanyService{
 				Store: tt.fields.Store,
 			}
 			got, err := s.Get(tt.args.id)
@@ -127,7 +126,7 @@ func TestCompanyService_GetByName(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &service.CompanyService{
+			s := &CompanyService{
 				Store: tt.fields.Store,
 			}
 			got, err := s.GetByName(tt.args.name)
@@ -159,7 +158,7 @@ func TestCompanyService_Create(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &service.CompanyService{
+			s := &CompanyService{
 				Store: tt.fields.Store,
 			}
 			if err := s.Create(tt.args.comp); (err != nil) != tt.wantErr {
@@ -186,7 +185,7 @@ func TestCompanyService_Delete(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &service.CompanyService{
+			s := &CompanyService{
 				Store: tt.fields.Store,
 			}
 			if err := s.Delete(tt.args.id); (err != nil) != tt.wantErr {
