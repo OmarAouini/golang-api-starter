@@ -1,5 +1,5 @@
 #need to install mockery
-# go install github.com/vektra/mockery/v2@latest
+go install github.com/vektra/mockery/v2@latest
 # or
 # brew install mockery
 
