@@ -12,5 +12,5 @@ var (
 	DB_HOST      = "127.0.0.1"
 	DB_PORT      = "3306"
 	DB_IDLE_CONN = 1
-	DB_MAX_CONN  = 1
+	DB_MAX_CONN  = 2
 )
