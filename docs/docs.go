@@ -27,7 +27,7 @@ const docTemplate = `{
     "paths": {
         "/companies": {
             "get": {
-                "description": "All companies",
+                "description": "return a list containing all companies",
                 "produces": [
                     "application/json"
                 ],

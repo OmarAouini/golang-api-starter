@@ -34,7 +34,7 @@ func newCompanyController() *CompanyController {
 
 // All godoc
 // @Summary      All
-// @Description  All companies
+// @Description  return a list containing all companies
 // @Tags         companies
 // @Produce      json
 // @Success      200 {array} entities.Company
